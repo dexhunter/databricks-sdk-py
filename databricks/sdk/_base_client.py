@@ -402,7 +402,7 @@ class _StreamingResponse(BinaryIO):
         self._open()
         read_everything = n < 0
         remaining_bytes = n
-        res = b""
+        pieces = []
         while remaining_bytes > 0 or read_everything:
             if len(self._buffer) == 0:
                 try:
@@ -411,10 +411,10 @@ class _StreamingResponse(BinaryIO):
                     break
             bytes_available = len(self._buffer)
             to_read = bytes_available if read_everything else min(remaining_bytes, bytes_available)
-            res += self._buffer[:to_read]
+            pieces.append(self._buffer[:to_read])
             self._buffer = self._buffer[to_read:]
             remaining_bytes -= to_read
-        return res
+        return b"".join(pieces)
 
     def readable(self) -> bool:
         return self._content is not None
